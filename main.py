@@ -28,6 +28,7 @@ class EntML(object):
         self.rot_theta = []
 
         self.ref_data = np.array(ref_data)
+        self.ref_data_origin = np.array(ref_data)
         self.ref_data_amp = []
 
         self.distance = []
@@ -79,36 +80,27 @@ class EntML(object):
             self.col.append(distance.index(min(distance)))
             # print('The distances are {}'.format(distance))
 
-        '''
+    def save(self):
+        """
         save data: from http://blog.51cto.com/pmghong/1349978
-        '''
-
-        data_file = open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/data.txt', 'a')
+        """
+        data_file = open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/data.txt',
+                         'a')
         data_file.write(' \n')
         data_file.write(self.time + "\n")
-        for i in self.distance:
-            k = ' '.join([str(j) for j in i])
-            data_file.write(k + "\n")
-        data_file.write(' \n')
-        data_file.close()
+        self._tsave(self.ref_data_origin, data_file)  # save the ref data
 
-    def prj_mat(self):
-        p_mat = []
-        for theta in self.rot_theta[0]:
-            p_mat.append(np.dot(Ry(2*theta - np.pi/2).matrix, H.matrix))
-        return p_mat
+        new_data = np.zeros([200, self.data.shape[1] + 2 + self.ref_data.shape[0]])
+        new_data[:, 0:self.data.shape[1]] = Data
+        new_data[:, self.data.shape[1]+1:-1] = self.distance
+        new_data[:, -1] = test.col
+        data_save = new_data
+        self._tsave(data_save, data_file)
+
+        data_file.close()
 
     def plot(self):
         col_dict = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']  # max 8 classes
-        # red_group = []
-        # blue_group = []
-        # for i in range(len(self.data)):
-        #     if self.col[i] > 0:
-        #         red_group.append(self.data[i] * self.data_amp[i])
-        #     else:
-        #         blue_group.append(self.data[i] * self.data_amp[i])
-        # blue_group = np.array(blue_group)
-        # red_group = np.array(red_group)
 
         for ref_index in range(len(self.ref_data)):
             plt.scatter(self.ref_data[ref_index, 0]*self.ref_data_amp[ref_index], self.ref_data[ref_index, 1]*self.ref_data_amp[ref_index], c=col_dict[ref_index], marker='x')
@@ -120,6 +112,17 @@ class EntML(object):
         plt.savefig(fname=self.time)
         plt.show()
 
+    def _tsave(self, data_save, data_file):
+        """
+        a function that can save list
+        :param data_save: data would be saved
+        :param data_file: target file
+        :return: None
+        """
+        for i in data_save:
+            k = ' '.join([str(j) for j in i])
+            data_file.write(k + "\n")
+        data_file.write(' \n')
 
 def d_cal(vec1, vec2):
     """
@@ -154,20 +157,28 @@ def d_cal(vec1, vec2):
     return np.sqrt(2*prop*(norm1**2 + norm2**2))
 
 
-Data = 7 * np.random.rand(100, 2)
-# data += 0.0000000001*np.ones(list(data.shape))  # make sure the element not the int, since two int's div still be int
-ref_Data = [[1, 2.0],
-            [5, 3.0],
-            [3, 6.0]]
-test = EntML(Data, ref_Data)
-test.sim()
-test.plot()
+if __name__ == '__main__':
+    print('please select the task you want to perform: ')
+    print('1: classification, 2: calculate the distance between two vectors')
+    check_index = input('your choice: ')
 
-# print(test.prj_mat())
-# print(test.data_amp, test.ref_data_amp)
-# print(test.data, test.ref_data)
-# print(test.data_amp, test.ref_data_amp)
+    if check_index == '1':
+        ref_Data = [[1, 2.0],
+                    [5, 3.0],
+                    [3, 6.0],
+                    [3, 0.0]]
+        Data = 7 * np.random.rand(200, np.array(ref_Data).shape[1])
+        test = EntML(Data, ref_Data)
+        test.sim()
+        if test.data_dim == 2:  # if the data is more than two dimension, it is not easy to visualize.
+            test.save()
+            test.plot()
+        else:
+            test.save()
 
-# v1 = [1.0, 2.0]
-# v2 = [1.0, 2.0]
-# print(d_cal(v1, v2))
+    elif check_index == '2':
+        v1 = [1.0, 2.0]
+        v2 = [1.0, 2.0]
+        print(d_cal(v1, v2))
+    else:
+        print('you have selected a wrong index, please recheck that!!!')
