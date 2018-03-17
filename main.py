@@ -124,6 +124,7 @@ class EntML(object):
             data_file.write(k + "\n")
         data_file.write(' \n')
 
+
 def d_cal(vec1, vec2):
     """
     a function that calculate the euclid distance in a quantum way
@@ -163,10 +164,7 @@ if __name__ == '__main__':
     check_index = input('your choice: ')
 
     if check_index == '1':
-        ref_Data = [[1, 2.0],
-                    [5, 3.0],
-                    [3, 6.0],
-                    [3, 0.0]]
+        ref_Data = (7 * np.random.rand(4, 2)).tolist()
         Data = 7 * np.random.rand(200, np.array(ref_Data).shape[1])
         test = EntML(Data, ref_Data)
         test.sim()
@@ -175,7 +173,6 @@ if __name__ == '__main__':
             test.plot()
         else:
             test.save()
-
     elif check_index == '2':
         v1 = [1.0, 2.0]
         v2 = [1.0, 2.0]
