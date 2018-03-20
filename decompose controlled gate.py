@@ -2,7 +2,7 @@
 
 import numpy as np
 import projectq
-from projectq.ops import H, Measure, Rz, Ry
+from projectq.ops import H, Measure, Rz, Ry, X
 import copy
 import matplotlib.pyplot as plt
 
@@ -21,6 +21,7 @@ class Decompose(object):
         Rz(self.theta[0]) | self.qureg[0]
         Ry(self.theta[1]) | self.qureg[0]
         Rz(self.theta[2]) | self.qureg[0]
+
         self.eng.flush()
         mapping, wavefunction = copy.deepcopy(self.eng.backend.cheat())
         # print("The full wavefunction is: {}".format(wavefunction))
@@ -31,7 +32,7 @@ class Decompose(object):
 
 
 v_in = [3, 4.0]
-v_out = [5, 8.0]
+v_out = [2, 5.0]
 a = Decompose(v_in, v_out)
 
 delta_theta_test = 0.001
@@ -52,5 +53,14 @@ for i in range(10):
     plt.show()
     print(a.theta)
 
+#  [5, 8]
 #  [ 0.66714566  0.13101928 -0.66585639]
 #  [-0.41836957  0.05978185  0.46541381]
+#  [4, 10]
+#  [ 0.07622135  0.68185166 -0.16338988]
+#  [2, 5]
+#  [-0.05661405  0.69355188 -0.03520109]
+# theta = np.array([-0.05661405, 0.69355188, -0.03520109]) * 180 / np.pi
+# print(theta)
+# v_sim = np.dot(np.dot(np.dot(Rz(theta[2]).matrix, Ry(theta[1]).matrix), Rz(theta[0]).matrix), np.array([[3/5], [4/5]]))
+# print(v_sim)
