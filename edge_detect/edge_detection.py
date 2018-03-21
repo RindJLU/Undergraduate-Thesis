@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 
 def read_image():
     im = Image.open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/edge_detect/download.jpeg')
-    # im.show()
     width, height = im.size
     im = im.convert('L')
 
@@ -63,7 +62,7 @@ for row in range(row_num):
 new_im = MatrixToImage(new_image_data)
 # plt.imshow(new_image_data, cmap=plt.cm.gray, interpolation='nearest')
 new_im.show()
-# new_im.save('half_detect.bmp')
+new_im.save('half_detect1.bmp')
 
 
 # image_data = open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/imagedata.txt', 'a')
