@@ -14,6 +14,11 @@ class Build_CGate(object):
         self.input_norm = np.linalg.norm(self.input)
         self.output = v_out
         self.output_norm = np.linalg.norm(self.output)
+        # self.ref_wavefun = (np.kron(np.array([[1, 0]]), np.array(self.input)/self.input_norm) +
+        #                    np.kron(np.array([[0, 1]]), np.array(self.output)/self.output_norm))/np.sqrt(2)
+        # print(self.ref_wavefun)
+        # self.eng = MainEngine()
+        # self.qureg = self.eng.allocate_qureg(2)
 
     def cal_mat(self):
         C = np.array(Rz(self.theta[0]).matrix)
@@ -33,26 +38,35 @@ class Build_CGate(object):
         return loss
 
     def projectq(self):
-        eng = MainEngine()
-        qureg = eng.allocate_qureg(2)
-        H | qureg[0]
-        Ry(1.85) | qureg[1]
+        self.eng.flush()
+        self.eng.backend.set_wavefunction(np.array([1.0, 0, 0, 0]), self.qureg)
+        H | self.qureg[0]
+        Ry(1.85) | self.qureg[1]
 
-        Rz(self.theta[0]) | qureg[1]
-        CNOT | (qureg[0], qureg[1])
-        Ry(self.theta[1]) | qureg[1]
-        CNOT | (qureg[0], qureg[1])
-        Ry(-self.theta[1]) | qureg[1]
-        Rz(-self.theta[0]) | qureg[1]
+        Rz(self.theta[0]) | self.qureg[1]
+        CNOT | (self.qureg[0], self.qureg[1])
+        Ry(self.theta[1]) | self.qureg[1]
+        CNOT | (self.qureg[0], self.qureg[1])
+        Ry(-self.theta[1]) | self.qureg[1]
+        Rz(-self.theta[0]) | self.qureg[1]
 
-        H | qureg[1]
-        Ry(-0.07414198) | qureg[1]
-        eng.flush()
+        self.eng.flush()
+        b, wavefun = self.eng.backend.cheat()
+        loss = np.linalg.norm(self.ref_wavefun - wavefun)
 
-        a = eng.backend.get_probability('1', [qureg[1]])
-        Measure | qureg
-        print(a)
-        return a
+        Measure | self.qureg
+        return loss
+
+        # H | qureg[1]
+        # phi = 2 * np.arcsin(self.input_norm/np.sqrt(self.input_norm**2 + self.output_norm**2)) - np.pi/2
+        # Ry(phi) | qureg[1]
+        # self.eng.flush()
+
+        # a = eng.backend.get_probability('1', [qureg[1]])
+
+        # Measure | qureg
+        # print(a, wavefun)
+        # return a
 
 
 if __name__ == '__main__':
@@ -60,21 +74,24 @@ if __name__ == '__main__':
     v_out = [2, 5.0]
     exp = Build_CGate(v_in, v_out)
 
-    for iter in range(300):
+    for iters in range(300):
         exp.theta += 0.0001
         loss_plus = exp.cal_loss()
         exp.theta += -0.0002
         loss_min = exp.cal_loss()
 
         exp.loss.append(loss_plus)
+        exp.theta += 0.0001 - ((loss_plus - loss_min)/(2 * 0.0001))*0.01
 
-        exp.theta += 0.0001 - ((loss_plus - loss_min)/(2 * 0.0001))*0.02
-    print(exp.theta)
-    a = exp.projectq()
-    print(np.sqrt(2*a*114))
+    print(exp.theta, 180*np.array(exp.theta)/np.pi)
+
+    # print(np.sqrt(2*a*114))
     plt.plot(exp.loss)
     plt.show()
 
-
 # [-0.10789846 -0.25448352]
+# [-0.12229118 -0.25317151]
+# [ -7.00676875 -14.50565914]
+# [ 0.04367479 -0.26573644] [  2.50238111 -15.22557654]
+# [ 0.15753203 -0.2708032 ] [  9.02592066 -15.51588038]
 # [-0.38516352 -0.07627915]  [5, 8]
