@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 
 def read_image():
     im = Image.open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/edge_detect/download.jpeg')
-    width, height = im.size
+    # width, height = im.size
     im = im.convert('L')
 
     data = np.zeros([256, 256])
     data_image = im.getdata()
+    print(np.matrix(data_image, dtype='float').shape)
     data_image = (np.matrix(data_image, dtype='float').reshape(225, 225))/255
     data[0:225, 0:225] = data_image
     return data
@@ -45,28 +46,37 @@ def MatrixToImage(data):
     return new_im
 
 
-new_wavefun = (abs(simu(cal_wavefun(read_image()))))
-# new_im = MatrixToImage(new_wavefun)
-#
+data = read_image()
+origin_wavefun = cal_wavefun(data)
+new_wavefun = simu(origin_wavefun)
+
 # new_im.show()
-print(new_wavefun[166, 136] > 0)
-new_image_data = np.zeros([256, 256])
-edge_index = new_wavefun.max()/1.7
+# print(new_wavefun[166, 136] > 0)
+
+new_image_data = np.ones([256, 256])
+edge_index = origin_wavefun.max()/15
+
 (row_num, col_num) = new_wavefun.shape
-print(row_num, col_num)
+
 for row in range(row_num):
     for col in range(col_num):
-        if new_wavefun[row][col] > edge_index:
-            new_image_data[row][col] = new_wavefun[row][col]*300
+        if col % 2 == 1:
+            if new_wavefun[row][col] > edge_index:
+                new_image_data[row][col] = 0
+            elif new_wavefun[row][col] < -edge_index:
+                new_image_data[row][col-1] = 0
+        else:
+            new_image_data[row][col] = 1
 
-new_im = MatrixToImage(new_image_data)
+
+new_im = MatrixToImage(new_image_data[0:row_num][0:col_num])
 # plt.imshow(new_image_data, cmap=plt.cm.gray, interpolation='nearest')
 new_im.show()
-new_im.save('half_detect1.bmp')
+# new_im.save('half_detect_smile.bmp')
 
 
-# image_data = open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/imagedata.txt', 'a')
-# for i in new_wavefun:
+# image_data = open('/home/yufeng/Documents/undergraduate thesis/projects/quantum distance calculation/edge_detect/imagedata.txt', 'a')
+# for i in data:
 #     k = ' '.join([str(j) for j in i])
 #     image_data.write(k + "\n")
 # image_data.write(' \n')
