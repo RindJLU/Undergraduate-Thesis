@@ -164,12 +164,12 @@ if __name__ == '__main__':
     check_index = input('your choice: ')
 
     if check_index == '1':
-        ref_Data = (7 * np.random.rand(4, 2)).tolist()
+        ref_Data = (7 * np.random.rand(2, 2)).tolist()
         Data = 7 * np.random.rand(200, np.array(ref_Data).shape[1])
         test = EntML(Data, ref_Data)
         test.sim()
         if test.data_dim == 2:  # if the data is more than two dimension, it is not easy to visualize.
-            test.save()
+            # test.save()
             test.plot()
         else:
             test.save()

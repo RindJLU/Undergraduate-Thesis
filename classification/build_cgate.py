@@ -78,11 +78,11 @@ class Build_CGate(object):
 
 
 if __name__ == '__main__':
-    v_in = [2, 1.0]
-    v_out = [6, 4.0]
+    v_in = [2, 8.0]
+    v_out = [3, 4.0]
     exp = Build_CGate(v_in, v_out)
 
-    for iters in range(300):
+    for iters in range(1000):
         for i in range(len(exp.theta)):
             exp.theta[i] += 0.0001
             loss_plus = exp.cal_loss()
